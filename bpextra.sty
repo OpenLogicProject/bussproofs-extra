@@ -1,0 +1,90 @@
+% bpextra.sty
+% extra commandsfor bussproofs.sty
+
+\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+\ProvidesPackage{bpextra}
+
+\RequirePackage{bussproofs}
+
+\newdimen\CenterCorrection
+
+\def\fDeduce{$\vdots\atop\vdots$}
+
+\def\Deduce$#1\fCenter#2${%
+    \prepUnary%
+    \buildConclusion{#1}{#2}%
+    \setbox\myBoxA=\hbox{\fCenter}
+    % if we align at \fCenter, move \fDeduce left by 1/2 width of \fCenter 
+    \global\CenterCorrection=-.5\wd\myBoxA
+    \joinDeduce%
+    \resetInferenceDefaults%
+    \ignorespaces%
+}
+
+\def\DeduceC#1{
+    \prepUnary%
+    \buildConclusionC{#1}%
+    \global\CenterCorrection=0pt
+    %Align and join the curBox and the new box into one vbox.
+    \joinDeduce%
+    \resetInferenceDefaults%
+    \ignorespaces%
+}
+
+% Align and join \curBox and \myBoxC into a single vbox
+% \curBox holds the upper proof
+% \curScoreStart is distance to where the line below the premise starts
+% \curScoreCenter is distance from score to alignment point
+
+
+\def\joinDeduce{%
+    \global\advance\curCenter by -\hypKernAmt%
+    \ifnum\curCenter<\newCenter%
+        \displace=\newCenter%
+        \advance \displace by -\curCenter%
+        \kernUpperBox%
+    \else%
+        \displace=\curCenter%
+        \advance \displace by -\newCenter%
+        \kernLowerBox%
+    \fi%
+        \ifnum \newScoreStart < \curScoreStart %
+        \global \curScoreStart = \newScoreStart \fi%
+    \ifnum \curScoreEnd < \newScoreEnd %
+        \global \curScoreEnd = \newScoreEnd \fi%
+    % Leave room for the left label.
+    \ifnum \curScoreStart<\wd\myBoxLL%
+        \global\displace = \wd\myBoxLL%
+        \global\advance\displace by -\curScoreStart%
+        \kernUpperBox%
+        \kernLowerBox%
+    \fi%
+    % Draw the score
+    \buildStraightDeduce%
+    % Form the score and labels into a box.
+    \buildScoreLabels%
+    % Form the new box and its dimensions
+    \ifx\rootAtBottomFlag\myTrue%
+        \buildRootBottom%
+    \else%
+        \buildRootTop%
+    \fi%
+    \global \curScoreStart=\newScoreStart%
+    \global \curScoreEnd=\newScoreEnd%
+    \global \curCenter=\newCenter%
+}
+
+% \buildStraightDeduce
+
+\def\buildStraightDeduce{%
+    \global\setbox \myBoxD =%
+        \hbox{\fDeduce}%
+    \displace = \wd\myBoxD % find width of vdots
+    % set start and end of current score to left and right of \vdots
+    \global\curScoreStart = \curCenter% 
+    \global\advance\curScoreStart by -.5\displace%
+    \global\curScoreEnd = \curCenter% 
+    \global\advance\curScoreStart by -.5\displace%
+    \global\advance\curScoreStart by\CenterCorrection
+    \global\advance\curScoreEnd by\CenterCorrection
+}
