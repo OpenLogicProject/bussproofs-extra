@@ -22,9 +22,29 @@
 
 \RequirePackage{bussproofs}
 
+\RequirePackage{tikz}
+
+% bussproofs aligns sequents ate the right end of the sequent arrow,
+% this is the correction to get the middle
 \newdimen\CenterCorrection
 
-\def\fDeduce{$\vdots\atop\vdots$}
+\def\straightDeduce{%
+  \gdef\fDeduce{\tikz\draw[very thick,loosely dotted] (0,0) -- (0,1);}
+  \ignorespaces
+}
+
+\def\branchDeduce{%
+  \gdef\fDeduce{\begin{tikzpicture}
+      \draw[very thick,loosely dotted] (0,0) -- (0,1);
+      \draw[very thick,loosely dotted] (-.5,.5) -- (0,0);
+      \draw[very thick,loosely dotted] (.5,.5) -- (0,0);
+  \end{tikzpicture}}
+  \ignorespaces
+}
+
+% straight dots for deductions by default
+\straightDeduce
+
 
 \def\Deduce$#1\fCenter#2${%
     \prepUnary%
@@ -100,7 +120,7 @@
     \global\curScoreStart = \curCenter% 
     \global\advance\curScoreStart by -.5\displace%
     \global\curScoreEnd = \curCenter% 
-    \global\advance\curScoreStart by -.5\displace%
+    \global\advance\curScoreEnd by -.5\displace%
     \global\advance\curScoreStart by\CenterCorrection
     \global\advance\curScoreEnd by\CenterCorrection
 }
