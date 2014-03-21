@@ -67,6 +67,9 @@
   \ignorespaces
 }
 
+% chose default deduction style
+\def\alwaysDeduce{\straightDeduce}
+
 % straight dots for deductions by default
 \straightDeduce
 
@@ -122,9 +125,9 @@
         \kernLowerBox%
         \advance\curCenter by-.5\DiagCorrection
     \else
-        \displace=\DiagCorrection
+        \displace=.5\DiagCorrection
         \kernUpperBox%
-        \advance\curCenter by -.5\DiagCorrection
+        \advance\curCenter by -.25\DiagCorrection
     \fi%
     %\ifnum \newScoreStart < \curScoreStart %
     %    \global \curScoreStart = \newScoreStart \fi%
@@ -173,15 +176,19 @@
 \def\RightLineLabel#1{\global\def\displayRightLineLabel{\rlap{\hskip\ScoreOverhangLeft\hskip\labelSpacing #1}}\ignorespaces}
 
 
+% patched bussproofs.sty commands
+
 \def\resetInferenceDefaults{%
     \global\def\theHypSeparation{\defaultHypSeparation}%
     \global\setbox\myBoxLL=\hbox{\defaultLeftLabel}%
     \global\setbox\myBoxRL=\hbox{\defaultRightLabel}%
     \global\def\buildScore{\alwaysBuildScore}%
     \global\def\theScoreFiller{\alwaysScoreFiller}%
-    % reset line labels to nohing
-    \global\let\displayLeftLineLabel\relax
-    \global\let\displayRightLineLabel\relax
+    % reset line labels to nothing %bpextra
+    \global\let\displayLeftLineLabel\relax %bpextra
+    \global\let\displayRightLineLabel\relax %bppextra
+    % reset to detaul deduce style %bpextra
+    \alwaysDeduce %bpextra
     \gdef\hypKernAmt{0pt}% Restore to zero kerning.
 }
 
@@ -193,8 +200,8 @@
     \prepAxiom%
     % Define the boxes
     % bpextra -- add line labels
-    \setbox\myBoxA=\hbox{\displayLeftLineLabel$\mathord{#1}\fCenter\mathord{\relax}$}%
-    \setbox\myBoxB=\hbox{$#2$\displayRightLineLabel}%
+    \setbox\myBoxA=\hbox{\displayLeftLineLabel$\mathord{#1}\fCenter\mathord{\relax}$}% %bpextra
+    \setbox\myBoxB=\hbox{$#2$\displayRightLineLabel}% %bpextra
     \global\setbox\curBox=%
          \hbox{\hskip\ScoreOverhangLeft\relax%
         \unhcopy\myBoxA\unhcopy\myBoxB\hskip\ScoreOverhangRight\relax}%
@@ -210,7 +217,7 @@
     % Get level and correct names set.
     \prepAxiom%
         % Define the box.
-    \setbox\myBoxA=\hbox{\displayLeftLineLabel #1\displayRightLineLabel}%
+    \setbox\myBoxA=\hbox{\displayLeftLineLabel #1\displayRightLineLabel}% %bpextra
     \global\setbox\curBox =%
         \hbox{\hskip\ScoreOverhangLeft\relax%
                         \unhcopy\myBoxA\hskip\ScoreOverhangRight\relax}%
@@ -224,8 +231,8 @@
 
 \def\buildConclusion#1#2{% Build lower sequent w/ center at \fCenter position.
     % Define the boxes
-        \setbox\myBoxA=\hbox{\displayLeftLineLabel $\mathord{#1}\fCenter\mathord{\relax}$}%
-        \setbox\myBoxB=\hbox{$#2$ \displayRightLineLabel}%
+        \setbox\myBoxA=\hbox{\displayLeftLineLabel $\mathord{#1}\fCenter\mathord{\relax}$}% %bpextra
+        \setbox\myBoxB=\hbox{$#2$\displayRightLineLabel}% %bpextra
     % Put them together in \myBoxC
     \setbox\myBoxC =%
           \hbox{\hskip\ScoreOverhangLeft\relax%
@@ -239,7 +246,7 @@
 
 \def\buildConclusionC#1{% Build lower sequent w/o \fCenter present.
         % Define the box.
-    \setbox\myBoxA=\hbox{\displayLeftLineLabel #1\displayRightLineLabel}%
+    \setbox\myBoxA=\hbox{\displayLeftLineLabel #1\displayRightLineLabel}% %bpextra
     \setbox\myBoxC =%
         \hbox{\hbox{\hskip\ScoreOverhangLeft\relax%
                         \unhcopy\myBoxA\hskip\ScoreOverhangRight\relax}}%
