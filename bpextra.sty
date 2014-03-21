@@ -24,21 +24,46 @@
 
 \RequirePackage{tikz}
 
-% bussproofs aligns sequents ate the right end of the sequent arrow,
+% bussproofs aligns sequents at the right end of the sequent arrow,
 % this is the correction to get the middle
 \newdimen\CenterCorrection
 
+% for ddotsDeduce and dotsdDeduce (diagonal) styles, the upper and lower
+% sequents will be displaced
+\newdimen\DiagCorrection
+
 \def\straightDeduce{%
   \gdef\fDeduce{\tikz\draw[very thick,loosely dotted] (0,0) -- (0,1);}
+  \global\DiagCorrection=0pt
   \ignorespaces
 }
 
+% Takeuti/Gentzen-style branching dots
 \def\branchDeduce{%
   \gdef\fDeduce{\begin{tikzpicture}
       \draw[very thick,loosely dotted] (0,0) -- (0,1);
       \draw[very thick,loosely dotted] (-.5,.5) -- (0,0);
       \draw[very thick,loosely dotted] (.5,.5) -- (0,0);
   \end{tikzpicture}}
+  \global\DiagCorrection=0pt
+  \ignorespaces
+}
+
+% Right-diagonal Dots
+\def\ddotsDeduce{%
+  \gdef\fDeduce{\begin{tikzpicture}
+      \draw[very thick,loosely dotted] (0,1) -- (1,0);
+  \end{tikzpicture}}
+  \setbox\myBoxA=\hbox{\fDeduce}
+  \global\DiagCorrection=-\wd\myBoxA
+  \ignorespaces
+}
+% Left-diagonal Dots
+\def\dotsdDeduce{%
+  \gdef\fDeduce{\begin{tikzpicture}
+      \draw[very thick,loosely dotted] (0,0) -- (1,1);
+  \end{tikzpicture}}
+  \global\DiagCorrection=\wd\myBoxA
   \ignorespaces
 }
 
@@ -60,8 +85,9 @@
 \def\DeduceC#1{
     \prepUnary%
     \buildConclusionC{#1}%
-    \global\CenterCorrection=0pt
-    %Align and join the curBox and the new box into one vbox.
+    % vdot alignment is off by a bit, correct
+    \global\CenterCorrection=-4pt
+    % Align and join the curBox and the new box into one vbox.
     \joinDeduce%
     \resetInferenceDefaults%
     \ignorespaces%
@@ -69,34 +95,50 @@
 
 % Align and join \curBox and \myBoxC into a single vbox
 % \curBox holds the upper proof
-% \curScoreStart is distance to where the line below the premise starts
-% \curScoreCenter is distance from score to alignment point
+% \curScoreStart is distance to where the line below the premise would start
+% \curScoreCenter is distance from left edge of score to alignment point
+% \curScoreEnd is width of score
 
 
 \def\joinDeduce{%
     \global\advance\curCenter by -\hypKernAmt%
+    % if center of premise left of center of conclusion
+    % move upper box to right by difference
+    % else move lower box right by difference
     \ifnum\curCenter<\newCenter%
         \displace=\newCenter%
         \advance \displace by -\curCenter%
         \kernUpperBox%
-    \else%
+    \else% 
         \displace=\curCenter%
         \advance \displace by -\newCenter%
         \kernLowerBox%
     \fi%
-        \ifnum \newScoreStart < \curScoreStart %
-        \global \curScoreStart = \newScoreStart \fi%
-    \ifnum \curScoreEnd < \newScoreEnd %
-        \global \curScoreEnd = \newScoreEnd \fi%
-    % Leave room for the left label.
-    \ifnum \curScoreStart<\wd\myBoxLL%
-        \global\displace = \wd\myBoxLL%
-        \global\advance\displace by -\curScoreStart%
-        \kernUpperBox%
+    % for ddotsDeduce, move lower box right
+    % for dotsdDeduce, move upper box left
+    % move curCenter to align with horizontal center of dots
+    \ifnum\DiagCorrection<0%
+        \displace=-\DiagCorrection
         \kernLowerBox%
+        \advance\curCenter by-.5\DiagCorrection
+    \else
+        \displace=\DiagCorrection
+        \kernUpperBox%
+        \advance\curCenter by -.5\DiagCorrection
     \fi%
-    % Draw the score
-    \buildStraightDeduce%
+    %\ifnum \newScoreStart < \curScoreStart %
+    %    \global \curScoreStart = \newScoreStart \fi%
+    %\ifnum \curScoreEnd < \newScoreEnd %
+    %    \global \curScoreEnd = \newScoreEnd \fi%
+    % Leave room for the left label.
+    %\ifnum \curScoreStart<\wd\myBoxLL%
+    %    \global\displace = \wd\myBoxLL%
+    %    \global\advance\displace by -\curScoreStart%
+    %    \kernUpperBox%
+    %    \kernLowerBox%
+    %\fi%
+    % Draw the deduction 
+    \buildDeduce%
     % Form the score and labels into a box.
     \buildScoreLabels%
     % Form the new box and its dimensions
@@ -110,9 +152,9 @@
     \global \curCenter=\newCenter%
 }
 
-% \buildStraightDeduce
+% \buildDeduce
 
-\def\buildStraightDeduce{%
+\def\buildDeduce{%
     \global\setbox \myBoxD =%
         \hbox{\fDeduce}%
     \displace = \wd\myBoxD % find width of vdots
@@ -120,7 +162,7 @@
     \global\curScoreStart = \curCenter% 
     \global\advance\curScoreStart by -.5\displace%
     \global\curScoreEnd = \curCenter% 
-    \global\advance\curScoreEnd by -.5\displace%
+    \global\advance\curScoreEnd by 5\displace%
     \global\advance\curScoreStart by\CenterCorrection
     \global\advance\curScoreEnd by\CenterCorrection
 }
