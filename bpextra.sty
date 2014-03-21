@@ -166,3 +166,86 @@
     \global\advance\curScoreStart by\CenterCorrection
     \global\advance\curScoreEnd by\CenterCorrection
 }
+
+% Line Labels!
+
+\def\LeftLineLabel#1{\global\def\displayLeftLineLabel{\llap{#1\hskip\ScoreOverhangLeft\hskip\labelSpacing}}\ignorespaces}
+\def\RightLineLabel#1{\global\def\displayRightLineLabel{\rlap{\hskip\ScoreOverhangLeft\hskip\labelSpacing #1}}\ignorespaces}
+
+
+\def\resetInferenceDefaults{%
+    \global\def\theHypSeparation{\defaultHypSeparation}%
+    \global\setbox\myBoxLL=\hbox{\defaultLeftLabel}%
+    \global\setbox\myBoxRL=\hbox{\defaultRightLabel}%
+    \global\def\buildScore{\alwaysBuildScore}%
+    \global\def\theScoreFiller{\alwaysScoreFiller}%
+    % reset line labels to nohing
+    \global\let\displayLeftLineLabel\relax
+    \global\let\displayRightLineLabel\relax
+    \gdef\hypKernAmt{0pt}% Restore to zero kerning.
+}
+
+    \global\let\displayLeftLineLabel\relax
+    \global\let\displayRightLineLabel\relax
+
+\def\Axiom$#1\fCenter#2${%
+    % Get level and correct names set.
+    \prepAxiom%
+    % Define the boxes
+    % bpextra -- add line labels
+    \setbox\myBoxA=\hbox{\displayLeftLineLabel$\mathord{#1}\fCenter\mathord{\relax}$}%
+    \setbox\myBoxB=\hbox{$#2$\displayRightLineLabel}%
+    \global\setbox\curBox=%
+         \hbox{\hskip\ScoreOverhangLeft\relax%
+        \unhcopy\myBoxA\unhcopy\myBoxB\hskip\ScoreOverhangRight\relax}%
+    % Set the relevant dimensions for the boxes
+    \global\curScoreStart=0pt \relax
+    \global\curScoreEnd=\wd\curBox \relax
+    \global\curCenter=\wd\myBoxA \relax
+    \global\advance \curCenter by \ScoreOverhangLeft%
+    \ignorespaces
+}
+
+\def\AxiomC#1{      % Note argument not in math mode
+    % Get level and correct names set.
+    \prepAxiom%
+        % Define the box.
+    \setbox\myBoxA=\hbox{\displayLeftLineLabel #1\displayRightLineLabel}%
+    \global\setbox\curBox =%
+        \hbox{\hskip\ScoreOverhangLeft\relax%
+                        \unhcopy\myBoxA\hskip\ScoreOverhangRight\relax}%
+    % Set the relevant dimensions for the boxes
+        \global\curScoreStart=0pt \relax
+        \global\curScoreEnd=\wd\curBox \relax
+        \global\curCenter=.5\wd\curBox \relax
+        \global\advance \curCenter by \ScoreOverhangLeft%
+    \ignorespaces
+}
+
+\def\buildConclusion#1#2{% Build lower sequent w/ center at \fCenter position.
+    % Define the boxes
+        \setbox\myBoxA=\hbox{\displayLeftLineLabel $\mathord{#1}\fCenter\mathord{\relax}$}%
+        \setbox\myBoxB=\hbox{$#2$ \displayRightLineLabel}%
+    % Put them together in \myBoxC
+    \setbox\myBoxC =%
+          \hbox{\hskip\ScoreOverhangLeft\relax%
+        \unhcopy\myBoxA\unhcopy\myBoxB\hskip\ScoreOverhangRight\relax}%
+    % Calculate the center of the \myBoxC string.
+    \newScoreStart=0pt \relax%
+    \newCenter=\wd\myBoxA \relax%
+    \advance \newCenter by \ScoreOverhangLeft%
+    \newScoreEnd=\wd\myBoxC%
+}
+
+\def\buildConclusionC#1{% Build lower sequent w/o \fCenter present.
+        % Define the box.
+    \setbox\myBoxA=\hbox{\displayLeftLineLabel #1\displayRightLineLabel}%
+    \setbox\myBoxC =%
+        \hbox{\hbox{\hskip\ScoreOverhangLeft\relax%
+                        \unhcopy\myBoxA\hskip\ScoreOverhangRight\relax}}%
+    % Calculate kerning to line up centers
+    \newScoreStart=0pt \relax%
+    \newCenter=.5\wd\myBoxC \relax%
+    \newScoreEnd=\wd\myBoxC%
+        \advance \newCenter by \ScoreOverhangLeft%
+}
