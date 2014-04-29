@@ -1,35 +1,32 @@
-%% bpextra.sty
-%% Copyright 2014 Richard Zach
-%
-% This work may be distributed and/or modified under the
-% conditions of the LaTeX Project Public License, either version 1.3
-% of this license or (at your option) any later version.
-% The latest version of this license is in
-%   http://www.latex-project.org/lppl.txt
-% and version 1.3 or later is part of all distributions of LaTeX
-% version 2005/12/01 or later.
-%
-% This work has the LPPL maintenance status `maintained'.
-% 
-% The Current Maintainer of this work is Richard Zach.
-%
-% This work consists of the file bpextra.sty
-
-% extra commands for bussproofs.sty
-
-\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+%%
+%% This is file `bpextra.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% bpextra.dtx  (with options: `package')
+%% 
+%% This is a generated file.
+%% 
+%% Copyright (C) 2008 by Richard Zach <rzach@ucalgary.ca>
+%% 
+%% This file may be distributed and/or modified under the conditions of
+%% the LaTeX Project Public License, either version 1.2 of this license
+%% or (at your option) any later version.  The latest version of this
+%% license is in:
+%% 
+%%    http://www.latex-project.org/lppl.txt
+%% 
+%% and version 1.2 or later is part of all distributions of LaTeX version
+%% 1999/12/01 or later.
+%% 
+\NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{bpextra}
-
+   [2014/04/26 0.1 Extra commands for bussproofs.sty]
 \RequirePackage{bussproofs}
-
 \RequirePackage{tikz}
 
-% bussproofs aligns sequents at the right end of the sequent arrow,
-% this is the correction to get the middle
 \newdimen\CenterCorrection
-
-% for ddotsDeduce and dotsdDeduce (diagonal) styles, the upper and lower
-% sequents will be displaced
 \newdimen\DiagCorrection
 
 \def\straightDeduce{%
@@ -38,7 +35,6 @@
   \ignorespaces
 }
 
-% Takeuti/Gentzen-style branching dots
 \def\branchDeduce{%
   \gdef\fDeduce{\begin{tikzpicture}
       \draw[very thick,loosely dotted] (0,0) -- (0,1);
@@ -49,7 +45,6 @@
   \ignorespaces
 }
 
-% Right-diagonal Dots
 \def\ddotsDeduce{%
   \gdef\fDeduce{\begin{tikzpicture}
       \draw[very thick,loosely dotted] (0,1) -- (1,0);
@@ -58,7 +53,7 @@
   \global\DiagCorrection=-\wd\myBoxA
   \ignorespaces
 }
-% Left-diagonal Dots
+
 \def\dotsdDeduce{%
   \gdef\fDeduce{\begin{tikzpicture}
       \draw[very thick,loosely dotted] (0,0) -- (1,1);
@@ -67,18 +62,14 @@
   \ignorespaces
 }
 
-% chose default deduction style
 \def\alwaysDeduce{\straightDeduce}
-
-% straight dots for deductions by default
 \straightDeduce
-
 
 \def\Deduce$#1\fCenter#2${%
     \prepUnary%
     \buildConclusion{#1}{#2}%
     \setbox\myBoxA=\hbox{\fCenter}
-    % if we align at \fCenter, move \fDeduce left by 1/2 width of \fCenter 
+    % if we align at \fCenter, move \fDeduce left by 1/2 width of \fCenter
     \global\CenterCorrection=-.5\wd\myBoxA
     \joinDeduce%
     \resetInferenceDefaults%
@@ -96,30 +87,17 @@
     \ignorespaces%
 }
 
-% Align and join \curBox and \myBoxC into a single vbox
-% \curBox holds the upper proof
-% \curScoreStart is distance to where the line below the premise would start
-% \curScoreCenter is distance from left edge of score to alignment point
-% \curScoreEnd is width of score
-
-
 \def\joinDeduce{%
     \global\advance\curCenter by -\hypKernAmt%
-    % if center of premise left of center of conclusion
-    % move upper box to right by difference
-    % else move lower box right by difference
     \ifnum\curCenter<\newCenter%
         \displace=\newCenter%
         \advance \displace by -\curCenter%
         \kernUpperBox%
-    \else% 
+    \else%
         \displace=\curCenter%
         \advance \displace by -\newCenter%
         \kernLowerBox%
     \fi%
-    % for ddotsDeduce, move lower box right
-    % for dotsdDeduce, move upper box left
-    % move curCenter to align with horizontal center of dots
     \ifnum\DiagCorrection<0%
         \displace=-\DiagCorrection
         \kernLowerBox%
@@ -140,11 +118,8 @@
     %    \kernUpperBox%
     %    \kernLowerBox%
     %\fi%
-    % Draw the deduction 
     \buildDeduce%
-    % Form the score and labels into a box.
     \buildScoreLabels%
-    % Form the new box and its dimensions
     \ifx\rootAtBottomFlag\myTrue%
         \buildRootBottom%
     \else%
@@ -155,28 +130,30 @@
     \global \curCenter=\newCenter%
 }
 
-% \buildDeduce
-
 \def\buildDeduce{%
     \global\setbox \myBoxD =%
         \hbox{\fDeduce}%
     \displace = \wd\myBoxD % find width of vdots
-    % set start and end of current score to left and right of \vdots
-    \global\curScoreStart = \curCenter% 
+    \global\curScoreStart = \curCenter%
     \global\advance\curScoreStart by -.5\displace%
-    \global\curScoreEnd = \curCenter% 
+    \global\curScoreEnd = \curCenter%
     \global\advance\curScoreEnd by 5\displace%
     \global\advance\curScoreStart by\CenterCorrection
     \global\advance\curScoreEnd by\CenterCorrection
 }
 
-% Line Labels!
+\def\LeftLineLabel#1{%
+  \global\def\displayLeftLineLabel{%
+    \llap{#1\hskip\ScoreOverhangLeft\hskip\labelSpacing}}
+  \ignorespaces}
 
-\def\LeftLineLabel#1{\global\def\displayLeftLineLabel{\llap{#1\hskip\ScoreOverhangLeft\hskip\labelSpacing}}\ignorespaces}
-\def\RightLineLabel#1{\global\def\displayRightLineLabel{\rlap{\hskip\ScoreOverhangLeft\hskip\labelSpacing #1}}\ignorespaces}
+\def\RightLineLabel#1{%
+  \global\def\displayRightLineLabel{
+    \rlap{\hskip\ScoreOverhangLeft\hskip\labelSpacing #1}}
+  \ignorespaces}
 
-
-% patched bussproofs.sty commands
+\global\let\displayLeftLineLabel\relax
+\global\let\displayRightLineLabel\relax
 
 \def\resetInferenceDefaults{%
     \global\def\theHypSeparation{\defaultHypSeparation}%
@@ -186,14 +163,11 @@
     \global\def\theScoreFiller{\alwaysScoreFiller}%
     % reset line labels to nothing %bpextra
     \global\let\displayLeftLineLabel\relax %bpextra
-    \global\let\displayRightLineLabel\relax %bppextra
-    % reset to detaul deduce style %bpextra
+    \global\let\displayRightLineLabel\relax %bpextra
+    % reset to defaul deduce style %bpextra
     \alwaysDeduce %bpextra
     \gdef\hypKernAmt{0pt}% Restore to zero kerning.
 }
-
-    \global\let\displayLeftLineLabel\relax
-    \global\let\displayRightLineLabel\relax
 
 \def\Axiom$#1\fCenter#2${%
     % Get level and correct names set.
@@ -256,3 +230,6 @@
     \newScoreEnd=\wd\myBoxC%
         \advance \newCenter by \ScoreOverhangLeft%
 }
+\endinput
+%%
+%% End of file `bpextra.sty'.
