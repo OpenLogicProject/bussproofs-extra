@@ -31,6 +31,7 @@
 \documentclass{ltxdoc}
 
 \usepackage{bpextra}
+\usepackage{hyperref}
 
 \renewcommand{\fCenter}{\ensuremath{\,{\to}\,}}
 
@@ -74,17 +75,18 @@
 %
 % \title{The \textsf{bpextra} package\thanks{This document
 %   corresponds to \textsf{bpextra}~\fileversion, dated \filedate.}}
-% \author{Richard Zach \\ \texttt{rzach@ucalgary.ca}}
+% \author{\href{http://ucalgary.ca/rzach/}{Richard Zach}}
+% \date{}
 %
 % \maketitle
 %
 % \section{Introduction}
 %
 % The \textsf{bpextra} package provides additional functionality for
-% the proof tree typesetting package \textsf{bussproofs}.  It is
-% experimental and tested only with v.1.1, and only in \LaTeX{} mode
-% with upward-growing trees.
-%
+% the proof tree typesetting package
+% \href{http://math.ucsd.edu/~sbuss/ResearchWeb/bussproofs/}{\textsf{bussproofs}}
+% by Sam Buss.  It is experimental and tested only with v.1.1, and
+% only in \LaTeX{} mode with upward-growing trees.
 % Functionality provided includes:
 %
 % \begin{enumerate}
@@ -107,9 +109,39 @@
 %   next to the conclusion of an inference/deduction intead of the score
 %   line.  \textbf{These don't work properly and may be removed!}
 % \end{enumerate}
+%
+% The most up-to-date version of this package is available at the
+% \href{https://github.com/OpenLogicProject/bpextra}{Open Logic
+% Project github site}, where you can file bug reports as well.
 % 
 % \subsection{Example}
 %
+% \begin{verbatim}
+% \begin{prooftree}
+% \AxiomC{}
+% \RightLabel{$\pi_1(a)$}
+% \Deduce$\Gamma_1 \fCenter \Theta_1, F(a)$
+% \RightLabel{$\forall$R}
+% \UnaryInf$\Gamma_1 \fCenter \Theta_1, \forall x\,F(x)$
+% \ddotsDeduce
+% \RightLabel{$\pi_1'$}
+% \Deduce$\Gamma \fCenter \Theta, \forall x\,F(x)$
+% \AxiomC{}
+% \RightLabel{$\pi_2$}
+% \Deduce$F(n), \Delta_1 \fCenter \Lambda_1$
+% \RightLabel{$\forall$L}
+% \UnaryInf$\forall x\,F(x), \Delta_1 \fCenter \Lambda_1$
+% \dotsdDeduce
+% \RightLabel{$\pi_2'$}
+% \Deduce$\forall x\,F(x), \Delta \fCenter \Lambda$
+% \RightLabel{cut}
+% \BinaryInf$\Gamma, \Delta \fCenter \Theta, \Lambda$
+% \RightLabel{$\pi_4$}
+% \branchDeduce
+% \Deduce$\Pi \fCenter \Xi$
+% \end{prooftree}
+% \end{verbatim}
+% produces this:
 % \begin{prooftree}
 % \AxiomC{}
 % \RightLabel{$\pi_1(a)$}
@@ -140,7 +172,7 @@
 %
 % \subsection{Setup}
 % 
-% We require |bussproofs| (obviously) and and |tikz| for
+% We require \textsf{bussproofs} (obviously) and and \textsf{tikz} for
 % drawing things.
 %
 %    \begin{macrocode}
@@ -150,10 +182,10 @@
 %    \end{macrocode}
 % \subsection{Dimensions}
 % 
-% |bussproofs| aligns sequents at the right end of the sequent
+% \textfs{bussproofs} aligns sequents at the right end of the sequent
 % arrow, so we need to remember by how much to correct to get
-% deductions to the middle of sequents.  For ddotsDeduce and
-% dotsdDeduce (diagonal) styles, the upper and lower sequents will be
+% deductions to the middle of sequents.  For |\ddotsDeduce| and
+% |\dotsdDeduce| (diagonal) styles, the upper and lower sequents will be
 % displaced.
 %    \begin{macrocode}
 \newdimen\CenterCorrection
@@ -162,14 +194,15 @@
 %    \end{macrocode} 
 % \subsection{Deduce Styles} 
 %
-% The following commands set the style for the next Deduce
-% command. straightDeduce produces a simple vertical line of dots,
-% branchDeduce produces centered branching (Takeuti/Gentzen-style)
-% dots, ddotsDeduce right-diagonal dots, and dotsdDeduce left-diagonal
-% dots. They do this by redefining the fDeduce command which produces
-% the dots and sets up the dimensions. The alwaysDeduce command is
-% used to (re)set the deduce style to a default. It can be redefned to
-% change the default deduce style.
+% The following commands set the style for the next |\Deduce|
+% command. |\straightDeduce| produces a simple vertical line of dots,
+% |\branchDeduce| produces centered branching (Takeuti/Gentzen-style)
+% dots, |\ddotsDeduce| left-to-right diagonal dots, and |\dotsdDeduce|
+% right-to-left diagonal dots. They do this by redefining the
+% |\fDeduce| command which produces the dots and sets up the
+% dimensions. The |\alwaysDeduce| command is used to (re)set the
+% deduce style to a default and is executed every time a deduction is
+% typeset. It can be redefined to change the default deduce style.
 %    \begin{macrocode}
 \def\straightDeduce{%
   \gdef\fDeduce{\tikz\draw[very thick,loosely dotted] (0,0) -- (0,1);}
@@ -208,11 +241,12 @@
 \straightDeduce
 
 %    \end{macrocode}
-% \subsection{\texttt{\textbackslash Deduce\$} and \texttt{\textbackslash DeduceC}}
+% \subsection{\texttt{\textbackslash Deduce\$} and
+% \texttt{\textbackslash DeduceC}}
 % 
-% |\Deduce\$| and |\DeduceC| are the commands to actually produce the
-% deductions. They are used and work just like |\UnaryInf\$| and
-% |\UnaryInf|.
+% |\Deduce$| and |\DeduceC| are the commands to actually produce the
+% deductions. They are used and work just like |\UnaryInf$| and
+% |\UnaryInfC|.
 %    \begin{macrocode}
 \def\Deduce$#1\fCenter#2${%
     \prepUnary%
