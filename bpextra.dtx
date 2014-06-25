@@ -165,6 +165,38 @@
 % \branchDeduce
 % \Deduce$\Pi \fCenter \Xi$
 % \end{prooftree}
+
+% It is also possible to label entire subproofs on the left and on the right.
+% \begin{verbatim}
+% \begin{prooftree}
+% \AxiomC{}
+% \Deduce$\Gamma \fCenter \Delta$
+% \Deduce$\Gamma \fCenter \Delta, A$
+% \LeftSubproofLabel{$\pi$}
+% \AxiomC{}
+% \Deduce$\Gamma' \fCenter \Delta'$
+% \Deduce$A, \Gamma' \fCenter \Delta'$
+% \RightSubproofLabel{$\pi'$}
+% \RightLabel{cut}
+% \BinaryInf$\Gamma, \Gamma' \fCenter \Delta, \Delta'$
+% \Deduce$\Pi \fCenter \Lambda$
+% \end{prooftree}
+% \end{verbatim}
+% \begin{prooftree}
+% \AxiomC{}
+% \Deduce$\Gamma \fCenter \Delta$
+% \Deduce$\Gamma \fCenter \Delta, A$
+% \LeftSubproofLabel{$\pi$}
+% \AxiomC{}
+% \Deduce$\Gamma' \fCenter \Delta'$
+% \Deduce$A, \Gamma' \fCenter \Delta'$
+% \RightSubproofLabel{$\pi'$}
+% \RightLabel{cut}
+% \BinaryInf$\Gamma, \Gamma' \fCenter \Delta, \Delta'$
+% \Deduce$\Pi \fCenter \Lambda$
+% \end{prooftree}
+
+
 %
 % \StopEventually{}
 %
@@ -383,6 +415,22 @@
 
 \global\let\displayLeftLineLabel\relax
 \global\let\displayRightLineLabel\relax
+
+%    \end{macrocode}
+%
+% \subsection{Subproof Labels}
+% Sometimes you'd like to lable entire subproofs.  This is done with
+% commands |\LeftSubproofLabel| and |\RightSubproofLabel|.
+%    \begin{macrocode}
+
+\def\LeftSubproofLabel#1{%
+     \global\setbox\curBox = \hbox{\vbox to \ht\curBox{\vfil\llap{#1 $\left\{\vrule height .5\ht\curBox width 0pt\right.$}\vfil}\box\curBox}%
+}
+
+\def\RightSubproofLabel#1{%
+  \displace=\ht\curBox
+     \global\setbox\curBox = \hbox{\box\curBox\vbox to \displace{\vfil\rlap{$\left.\vrule height .5\displace width 0pt\right\}$#1}\vfil}}%
+}
 
 %    \end{macrocode}
 % \subsection{Patched commands from \textsf{bussproofs}}

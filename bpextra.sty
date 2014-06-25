@@ -23,6 +23,8 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{bpextra}
    [2014/04/26 0.1 Extra commands for bussproofs.sty]
+
+
 \RequirePackage{bussproofs}
 \RequirePackage{tikz}
 
@@ -154,6 +156,16 @@
 
 \global\let\displayLeftLineLabel\relax
 \global\let\displayRightLineLabel\relax
+
+
+\def\LeftSubproofLabel#1{%
+     \global\setbox\curBox = \hbox{\vbox to \ht\curBox{\vfil\llap{#1 $\left\{\vrule height .5\ht\curBox width 0pt\right.$}\vfil}\box\curBox}%
+}
+
+\def\RightSubproofLabel#1{%
+  \displace=\ht\curBox
+     \global\setbox\curBox = \hbox{\box\curBox\vbox to \displace{\vfil\rlap{$\left.\vrule height .5\displace width 0pt\right\}$#1}\vfil}}%
+}
 
 \def\resetInferenceDefaults{%
     \global\def\theHypSeparation{\defaultHypSeparation}%
