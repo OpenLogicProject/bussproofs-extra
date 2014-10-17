@@ -22,7 +22,7 @@
 %% 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{bpextra}
-   [2014/04/26 0.1 Extra commands for bussproofs.sty]
+   [2014/10/16 0.2 Extra commands for bussproofs.sty]
 
 
 \RequirePackage{bussproofs}
@@ -58,8 +58,9 @@
 
 \def\dotsdDeduce{%
   \gdef\fDeduce{\begin{tikzpicture}
-      \draw[very thick,loosely dotted] (0,0) -- (1,1);
+      \draw[very thick,loosely dotted] (1,1) -- (0,0);
   \end{tikzpicture}}
+  \setbox\myBoxA=\hbox{\fDeduce}
   \global\DiagCorrection=\wd\myBoxA
   \ignorespaces
 }
@@ -103,12 +104,11 @@
     \ifnum\DiagCorrection<0%
         \displace=-\DiagCorrection
         \kernLowerBox%
-        \advance\curCenter by-.5\DiagCorrection
     \else
-        \displace=.5\DiagCorrection
+        \displace=\DiagCorrection
         \kernUpperBox%
-        \advance\curCenter by -.25\DiagCorrection
     \fi%
+    \advance\curCenter by-.5\DiagCorrection
     %\ifnum \newScoreStart < \curScoreStart %
     %    \global \curScoreStart = \newScoreStart \fi%
     %\ifnum \curScoreEnd < \newScoreEnd %
@@ -139,7 +139,7 @@
     \global\curScoreStart = \curCenter%
     \global\advance\curScoreStart by -.5\displace%
     \global\curScoreEnd = \curCenter%
-    \global\advance\curScoreEnd by 5\displace%
+    \global\advance\curScoreEnd by .5\displace%
     \global\advance\curScoreStart by\CenterCorrection
     \global\advance\curScoreEnd by\CenterCorrection
 }

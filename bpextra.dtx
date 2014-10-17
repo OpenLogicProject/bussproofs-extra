@@ -26,7 +26,7 @@
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}
 %<package>\ProvidesPackage{bpextra}
-%<package>   [2014/04/26 0.1 Extra commands for bussproofs.sty]
+%<package>   [2014/10/16 0.2 Extra commands for bussproofs.sty]
 %<*driver>
 \documentclass{ltxdoc}
 
@@ -65,6 +65,7 @@
 %   Right brace   \}     Tilde         \~}
 %
 %
+% \changes{v0.2}{2014/10/16}{Fixed bug in dotsdDeduce, added examples}
 % \changes{v0.1}{2014/04/26}{Initial version with deduce, linelabel 
 %    functionality}
 %
@@ -109,6 +110,52 @@
 %   next to the conclusion of an inference/deduction intead of the score
 %   line.  \textbf{These don't work properly and may be removed!}
 % \end{enumerate}
+%
+% Here's what these deductions look like:
+%
+% \begin{center}
+% \begin{tabular}{@{}llll@{}}
+% \fbox{\AxiomC{$A$}
+% \straightDeduce
+% \DeduceC{$B$}
+% \DisplayProof} &
+% \fbox{\AxiomC{$A$}
+% \branchDeduce
+% \DeduceC{$B$}
+% \DisplayProof} &
+% \fbox{\AxiomC{$A$}
+% \ddotsDeduce
+% \DeduceC{$B$}
+% \DisplayProof} &
+% \fbox{\AxiomC{$A$}
+% \dotsdDeduce
+% \DeduceC{$B$}
+% \DisplayProof} \\ \\
+% \fbox{\Axiom$A \fCenter B$
+% \straightDeduce
+% \Deduce$A \lor C \fCenter B$
+% \DisplayProof} &
+% \fbox{\Axiom$A \fCenter B$
+% \branchDeduce
+% \Deduce$A \lor C \fCenter B$
+% \DisplayProof} &
+% \fbox{\Axiom$A  \fCenter B$
+% \ddotsDeduce
+% \Deduce$A \lor C \fCenter B$
+% \DisplayProof} &
+% \fbox{\Axiom$A \fCenter B$
+% \dotsdDeduce
+% \Deduce$A \lor C \fCenter B$
+% \DisplayProof}
+% \\ \\
+% \texttt{straightDeduce} &
+% \texttt{branchDeduce} &
+% \texttt{ddotsDeduce} &
+% \texttt{dotsdDeduce} 
+% \end{tabular}
+% \end{center}
+%
+%
 %
 % The most up-to-date version of this package is available at the
 % \href{https://github.com/OpenLogicProject/bpextra}{Open Logic
@@ -263,8 +310,9 @@
 
 \def\dotsdDeduce{%
   \gdef\fDeduce{\begin{tikzpicture}
-      \draw[very thick,loosely dotted] (0,0) -- (1,1);
+      \draw[very thick,loosely dotted] (1,1) -- (0,0);
   \end{tikzpicture}}
+  \setbox\myBoxA=\hbox{\fDeduce}
   \global\DiagCorrection=\wd\myBoxA
   \ignorespaces
 }
@@ -328,18 +376,17 @@
     \fi%
 %    \end{macrocode}
 % For |\ddotsDeduce|, move lower box right; for |\dotsdDeduce|, move
-% upper box left; and set |\curCenter| to align with horizontal center
+% upper box right; then set |\curCenter| to align with horizontal center
 % of dots.
 %    \begin{macrocode}
     \ifnum\DiagCorrection<0%
         \displace=-\DiagCorrection
         \kernLowerBox%
-        \advance\curCenter by-.5\DiagCorrection
     \else
-        \displace=.5\DiagCorrection
+        \displace=\DiagCorrection
         \kernUpperBox%
-        \advance\curCenter by -.25\DiagCorrection
     \fi%
+    \advance\curCenter by-.5\DiagCorrection
     %\ifnum \newScoreStart < \curScoreStart %
     %    \global \curScoreStart = \newScoreStart \fi%
     %\ifnum \curScoreEnd < \newScoreEnd %
@@ -389,7 +436,7 @@
     \global\curScoreStart = \curCenter% 
     \global\advance\curScoreStart by -.5\displace%
     \global\curScoreEnd = \curCenter% 
-    \global\advance\curScoreEnd by 5\displace%
+    \global\advance\curScoreEnd by .5\displace%
     \global\advance\curScoreStart by\CenterCorrection
     \global\advance\curScoreEnd by\CenterCorrection
 }
