@@ -31,7 +31,7 @@
 \documentclass{ltxdoc}
 
 \usepackage{bpextra}
-\usepackage{hyperref}
+\usepackage[colorlinks,allcolors=blue]{hyperref}
 
 \renewcommand{\fCenter}{\ensuremath{\,{\to}\,}}
 
@@ -92,7 +92,7 @@
 %
 % \begin{enumerate}
 % \item |\Deduce$| and |\DeduceC| commands, which work much
-%  like |\Infer|, commands but indcate missing parts of a proof.
+%  like |\Infer|, commands but indicate missing parts of a proof.
 % \item Multiple styles for typesetting the result of |\Deduce|,
 % including 
 % \begin{enumerate}
@@ -471,12 +471,20 @@
 %    \begin{macrocode}
 
 \def\LeftSubproofLabel#1{%
-     \global\setbox\curBox = \hbox{\vbox to \ht\curBox{\vfil\llap{#1 $\left\{\vrule height .5\ht\curBox width 0pt\right.$}\vfil}\box\curBox}%
+  \global\setbox\curBox =
+  \hbox{\vbox to \ht\curBox{%
+      \vfil
+      \llap{#1$\left\{\vrule height .5\ht\curBox width 0pt\right.$}%
+      \vfil}\box\curBox}%
 }
 
 \def\RightSubproofLabel#1{%
   \displace=\ht\curBox
-     \global\setbox\curBox = \hbox{\box\curBox\vbox to \displace{\vfil\rlap{$\left.\vrule height .5\displace width 0pt\right\}$#1}\vfil}}%
+  \global\setbox\curBox =
+  \hbox{\box\curBox\vbox to \displace{%
+      \vfil
+      \rlap{$\left.\vrule height .5\displace width 0pt\right\}$#1}
+      \vfil}}%
 }
 
 %    \end{macrocode}
