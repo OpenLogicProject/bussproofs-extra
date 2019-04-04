@@ -1,10 +1,10 @@
-ALL: bpextra.sty bpextra.pdf
+ALL: bussproofs-extra.sty bussproofs-extra.pdf
 
-bpextra.sty: bpextra.dtx bpextra.ins
-	latex bpextra.ins
+bussproofs-extra.sty: bussproofs-extra.dtx bussproofs-extra.ins
+	latex bussproofs-extra.ins
 
-bpextra.pdf: bpextra.sty
-	pdflatex bpextra.dtx
-	makeindex -s gglo.ist -o bpextra.gls bpextra.glo
-	pdflatex bpextra.dtx
-	pdflatex bpextra.dtx
+bussproofs-extra.pdf: bussproofs-extra.sty
+	pdflatex bussproofs-extra.dtx
+	makeindex -s gglo.ist -o bussproofs-extra.gls bussproofs-extra.glo
+	pdflatex bussproofs-extra.dtx
+	pdflatex bussproofs-extra.dtx
