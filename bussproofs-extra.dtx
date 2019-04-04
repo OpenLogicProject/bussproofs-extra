@@ -31,8 +31,13 @@
 %<*driver>
 \documentclass{ltxdoc}
 
+<<<<<<< HEAD:bussproofs-extra.dtx
 \usepackage{bussproofs-extra}
 \usepackage[colorlinks]{hyperref}
+=======
+\usepackage{bpextra}
+\usepackage[colorlinks,allcolors=blue]{hyperref}
+>>>>>>> 4823829694ec2392dad7e3c55cd366f991c7c6db:bpextra.dtx
 
 \renewcommand{\fCenter}{\ensuremath{\,{\to}\,}}
 
@@ -94,7 +99,7 @@
 %
 % \begin{enumerate}
 % \item |\Deduce$| and |\DeduceC| commands, which work much
-%  like |\Infer|, commands but indcate missing parts of a proof.
+%  like |\Infer|, commands but indicate missing parts of a proof.
 % \item Multiple styles for typesetting the result of |\Deduce|,
 % including 
 % \begin{enumerate}
@@ -474,15 +479,29 @@
 
 \def\LeftSubproofLabel#1{%
   \global\setbox\curBox =
+<<<<<<< HEAD:bussproofs-extra.dtx
   \hbox{\vbox to \ht\curBox{\vfil\llap{#1
         $\left\{\vrule height .5\ht\curBox width 0pt\right.$}\vfil}\box\curBox}%
+=======
+  \hbox{\vbox to \ht\curBox{%
+      \vfil
+      \llap{#1$\left\{\vrule height .5\ht\curBox width 0pt\right.$}%
+      \vfil}\box\curBox}%
+>>>>>>> 4823829694ec2392dad7e3c55cd366f991c7c6db:bpextra.dtx
 }
 
 \def\RightSubproofLabel#1{%
   \displace=\ht\curBox
   \global\setbox\curBox =
+<<<<<<< HEAD:bussproofs-extra.dtx
   \hbox{\box\curBox\vbox to \displace{\vfil
       \rlap{$\left.\vrule height .5\displace width 0pt\right\}$#1}\vfil}}%
+=======
+  \hbox{\box\curBox\vbox to \displace{%
+      \vfil
+      \rlap{$\left.\vrule height .5\displace width 0pt\right\}$#1}
+      \vfil}}%
+>>>>>>> 4823829694ec2392dad7e3c55cd366f991c7c6db:bpextra.dtx
 }
 
 %    \end{macrocode}
