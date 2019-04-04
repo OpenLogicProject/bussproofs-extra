@@ -1,7 +1,7 @@
 % \iffalse meta-comment
 %
 %
-% Copyright (C) 2014 by Richard Zach <rzach@ucalgary.ca>
+% Copyright (C) 2019 by Richard Zach <rzach@ucalgary.ca>
 % ------------------------------------------------------
 %
 % This work may be distributed and/or modified under the
@@ -16,22 +16,23 @@
 % 
 % The Current Maintainer of this work is Richard Zach.
 %
-% This work consists of the files bpextra.dtx, bpextra.ins, bpextra.sty
+% This work consists of the files bussproofs-pextra.dtx,
+% bussproofs-extra.ins, bussproofs-extra.sty
 %
 % \fi
 %
 % \iffalse
 %<*driver>
-\ProvidesFile{bpextra.dtx}
+\ProvidesFile{bussproofs-extra.dtx}
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}
-%<package>\ProvidesPackage{bpextra}
-%<package>   [2014/10/16 0.2 Extra commands for bussproofs.sty]
+%<package>\ProvidesPackage{bussproofs-extra}
+%<package>   [2019/04/04 0.3 Extra commands for bussproofs.sty]
 %<*driver>
 \documentclass{ltxdoc}
 
-\usepackage{bpextra}
-\usepackage{hyperref}
+\usepackage{bussproofs-extra}
+\usepackage[colorlinks]{hyperref}
 
 \renewcommand{\fCenter}{\ensuremath{\,{\to}\,}}
 
@@ -39,7 +40,7 @@
 \CodelineIndex
 \RecordChanges
 \begin{document}
-  \DocInput{bpextra.dtx}
+  \DocInput{bussproofs-extra.dtx}
   \PrintChanges
   \PrintIndex
 \end{document}
@@ -65,17 +66,18 @@
 %   Right brace   \}     Tilde         \~}
 %
 %
+% \changes{v0.3}{2019/04/04}{Rename to bussproofs-extra.sty}
 % \changes{v0.2}{2014/10/16}{Fixed bug in dotsdDeduce, added examples}
 % \changes{v0.1}{2014/04/26}{Initial version with deduce, linelabel 
 %    functionality}
 %
-% \GetFileInfo{bpextra.sty}
+% \GetFileInfo{bussproofs-extra.sty}
 %
 % \DoNotIndex{\newcommand,\newenvironment}
 %
 %
-% \title{The \textsf{bpextra} package\thanks{This document
-%   corresponds to \textsf{bpextra}~\fileversion, dated \filedate.}}
+% \title{The \textsf{bussproofs-extra} package\thanks{This document
+%   corresponds to \textsf{bussproofs-extra}~\fileversion, dated \filedate.}}
 % \author{\href{http://ucalgary.ca/rzach/}{Richard Zach}}
 % \date{}
 %
@@ -83,7 +85,7 @@
 %
 % \section{Introduction}
 %
-% The \textsf{bpextra} package provides additional functionality for
+% The \textsf{bussproofs-extra} package provides additional functionality for
 % the proof tree typesetting package
 % \href{http://math.ucsd.edu/~sbuss/ResearchWeb/bussproofs/}{\textsf{bussproofs}}
 % by Sam Buss.  It is experimental and tested only with v.1.1, and
@@ -158,7 +160,7 @@
 %
 %
 % The most up-to-date version of this package is available at the
-% \href{https://github.com/OpenLogicProject/bpextra}{Open Logic
+% \href{https://github.com/OpenLogicProject/bussproofs-extra}{Open Logic
 % Project github site}, where you can file bug reports as well.
 % 
 % \subsection{Example}
@@ -471,19 +473,23 @@
 %    \begin{macrocode}
 
 \def\LeftSubproofLabel#1{%
-     \global\setbox\curBox = \hbox{\vbox to \ht\curBox{\vfil\llap{#1 $\left\{\vrule height .5\ht\curBox width 0pt\right.$}\vfil}\box\curBox}%
+  \global\setbox\curBox =
+  \hbox{\vbox to \ht\curBox{\vfil\llap{#1
+        $\left\{\vrule height .5\ht\curBox width 0pt\right.$}\vfil}\box\curBox}%
 }
 
 \def\RightSubproofLabel#1{%
   \displace=\ht\curBox
-     \global\setbox\curBox = \hbox{\box\curBox\vbox to \displace{\vfil\rlap{$\left.\vrule height .5\displace width 0pt\right\}$#1}\vfil}}%
+  \global\setbox\curBox =
+  \hbox{\box\curBox\vbox to \displace{\vfil
+      \rlap{$\left.\vrule height .5\displace width 0pt\right\}$#1}\vfil}}%
 }
 
 %    \end{macrocode}
 % \subsection{Patched commands from \textsf{bussproofs}}
 %
 % Some commands from \textsf{bussproofs.sty} have to be redefined to include
-% |bpextra| functionality. Added/changed lines are indicated by a
+% |bussproofs-extra| functionality. Added/changed lines are indicated by a
 % |%bpextra| comment
 %    \begin{macrocode}
 \def\resetInferenceDefaults{%
