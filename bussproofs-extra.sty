@@ -159,12 +159,20 @@
 
 
 \def\LeftSubproofLabel#1{%
-     \global\setbox\curBox = \hbox{\vbox to \ht\curBox{\vfil\llap{#1 $\left\{\vrule height .5\ht\curBox width 0pt\right.$}\vfil}\box\curBox}%
+  \global\setbox\curBox =
+  \hbox{\vbox to \ht\curBox{%
+      \vfil
+      \llap{#1$\left\{\vrule height .5\ht\curBox width 0pt\right.$}%
+      \vfil}\box\curBox}%
 }
 
 \def\RightSubproofLabel#1{%
   \displace=\ht\curBox
-     \global\setbox\curBox = \hbox{\box\curBox\vbox to \displace{\vfil\rlap{$\left.\vrule height .5\displace width 0pt\right\}$#1}\vfil}}%
+  \global\setbox\curBox =
+  \hbox{\box\curBox\vbox to \displace{%
+      \vfil
+      \rlap{$\left.\vrule height .5\displace width 0pt\right\}$#1}%
+      \vfil}}%
 }
 
 \def\resetInferenceDefaults{%
@@ -196,6 +204,9 @@
     \global\curScoreEnd=\wd\curBox \relax
     \global\curCenter=\wd\myBoxA \relax
     \global\advance \curCenter by \ScoreOverhangLeft%
+    % reset line labels to nothing %bpextra
+    \global\let\displayLeftLineLabel\relax %bpextra
+    \global\let\displayRightLineLabel\relax %bpextra
     \ignorespaces
 }
 
@@ -212,6 +223,9 @@
         \global\curScoreEnd=\wd\curBox \relax
         \global\curCenter=.5\wd\curBox \relax
         \global\advance \curCenter by \ScoreOverhangLeft%
+    % reset line labels to nothing %bpextra
+    \global\let\displayLeftLineLabel\relax %bpextra
+    \global\let\displayRightLineLabel\relax %bpextra
     \ignorespaces
 }
 

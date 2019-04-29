@@ -31,13 +31,8 @@
 %<*driver>
 \documentclass{ltxdoc}
 
-<<<<<<< HEAD:bussproofs-extra.dtx
 \usepackage{bussproofs-extra}
-\usepackage[colorlinks]{hyperref}
-=======
-\usepackage{bpextra}
 \usepackage[colorlinks,allcolors=blue]{hyperref}
->>>>>>> 4823829694ec2392dad7e3c55cd366f991c7c6db:bpextra.dtx
 
 \renewcommand{\fCenter}{\ensuremath{\,{\to}\,}}
 
@@ -71,6 +66,7 @@
 %   Right brace   \}     Tilde         \~}
 %
 %
+% \changes{v0.4}{2019/xx/xx}{Reset line labels next to axioms}
 % \changes{v0.3}{2019/04/04}{Rename to bussproofs-extra.sty}
 % \changes{v0.2}{2014/10/16}{Fixed bug in dotsdDeduce, added examples}
 % \changes{v0.1}{2014/04/26}{Initial version with deduce, linelabel 
@@ -479,29 +475,19 @@
 
 \def\LeftSubproofLabel#1{%
   \global\setbox\curBox =
-<<<<<<< HEAD:bussproofs-extra.dtx
-  \hbox{\vbox to \ht\curBox{\vfil\llap{#1
-        $\left\{\vrule height .5\ht\curBox width 0pt\right.$}\vfil}\box\curBox}%
-=======
   \hbox{\vbox to \ht\curBox{%
       \vfil
       \llap{#1$\left\{\vrule height .5\ht\curBox width 0pt\right.$}%
       \vfil}\box\curBox}%
->>>>>>> 4823829694ec2392dad7e3c55cd366f991c7c6db:bpextra.dtx
 }
 
 \def\RightSubproofLabel#1{%
   \displace=\ht\curBox
   \global\setbox\curBox =
-<<<<<<< HEAD:bussproofs-extra.dtx
-  \hbox{\box\curBox\vbox to \displace{\vfil
-      \rlap{$\left.\vrule height .5\displace width 0pt\right\}$#1}\vfil}}%
-=======
   \hbox{\box\curBox\vbox to \displace{%
       \vfil
-      \rlap{$\left.\vrule height .5\displace width 0pt\right\}$#1}
+      \rlap{$\left.\vrule height .5\displace width 0pt\right\}$#1}%
       \vfil}}%
->>>>>>> 4823829694ec2392dad7e3c55cd366f991c7c6db:bpextra.dtx
 }
 
 %    \end{macrocode}
@@ -540,6 +526,9 @@
     \global\curScoreEnd=\wd\curBox \relax
     \global\curCenter=\wd\myBoxA \relax
     \global\advance \curCenter by \ScoreOverhangLeft%
+    % reset line labels to nothing %bpextra
+    \global\let\displayLeftLineLabel\relax %bpextra
+    \global\let\displayRightLineLabel\relax %bpextra
     \ignorespaces
 }
 
@@ -556,6 +545,9 @@
         \global\curScoreEnd=\wd\curBox \relax
         \global\curCenter=.5\wd\curBox \relax
         \global\advance \curCenter by \ScoreOverhangLeft%
+    % reset line labels to nothing %bpextra
+    \global\let\displayLeftLineLabel\relax %bpextra
+    \global\let\displayRightLineLabel\relax %bpextra
     \ignorespaces
 }
 
