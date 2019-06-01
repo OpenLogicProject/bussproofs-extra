@@ -27,22 +27,21 @@
 %</driver>
 %<package>\NeedsTeXFormat{LaTeX2e}
 %<package>\ProvidesPackage{bussproofs-extra}
-%<package>   [2019/04/04 0.3 Extra commands for bussproofs.sty]
+%<package>   [2019/05/28 0.4 Extra commands for bussproofs.sty]
 %<*driver>
 \documentclass{ltxdoc}
 
 \usepackage{bussproofs-extra}
 \usepackage[colorlinks,allcolors=blue]{hyperref}
+\usepackage{calc}
 
 \renewcommand{\fCenter}{\ensuremath{\,{\to}\,}}
 
 \EnableCrossrefs         
-\CodelineIndex
 \RecordChanges
 \begin{document}
   \DocInput{bussproofs-extra.dtx}
   \PrintChanges
-  \PrintIndex
 \end{document}
 %</driver>
 % \fi
@@ -66,11 +65,11 @@
 %   Right brace   \}     Tilde         \~}
 %
 %
-% \changes{v0.4}{2019/xx/xx}{Reset line labels next to axioms}
-% \changes{v0.3}{2019/04/04}{Rename to bussproofs-extra.sty}
+% \changes{v0.4}{2019/05/31}{Better implementation of line labels; add
+% shortDeduce; style deduce lines} 
+% \changes{v0.3}{2019/04/04}{Rename to bussproofs-extra.sty} 
 % \changes{v0.2}{2014/10/16}{Fixed bug in dotsdDeduce, added examples}
-% \changes{v0.1}{2014/04/26}{Initial version with deduce, linelabel 
-%    functionality}
+% \changes{v0.1}{2014/04/26}{Initial version with deduce, linelabel functionality}
 %
 % \GetFileInfo{bussproofs-extra.sty}
 %
@@ -95,7 +94,7 @@
 %
 % \begin{enumerate}
 % \item |\Deduce$| and |\DeduceC| commands, which work much
-%  like |\Infer|, commands but indicate missing parts of a proof.
+%  like |\Infer| commands but indicate missing parts of a proof.
 % \item Multiple styles for typesetting the result of |\Deduce|,
 % including 
 % \begin{enumerate}
@@ -105,19 +104,23 @@
 %  to bottom right
 % \item |\dotsdDeduce|, which produces diagonal dots from top right
 %  to bottom left
+% \item |\shortDeduce|, which is like |\straightDeduce| but half the length
 % \end{enumerate}
 % |\straightDeduce| is the default.  It can be changed by redefining
 % |\alwaysDeduce|.
 % \item |\LeftLineLabel| and |\RightLineLabel| commands which
 %   work like |\LeftLabel| and |\RightLabel| but place a label
-%   next to the conclusion of an inference/deduction intead of the score
-%   line.  \textbf{These don't work properly and may be removed!}
+%   next to the conclusion of an inference/deduction instead of the score
+%   line.
+% \item |\LeftSubproofLabel| and |\RightSubproofLabel| commands which
+%   work like |\LeftLabel| and |\RightLabel| but place a label
+%   next to the entire preceding subproof with a curly brace.
 % \end{enumerate}
 %
 % Here's what these deductions look like:
 %
 % \begin{center}
-% \begin{tabular}{@{}llll@{}}
+% \begin{tabular}{@{}cccc@{}}
 % \fbox{\AxiomC{$A$}
 % \straightDeduce
 % \DeduceC{$B$}
@@ -159,11 +162,10 @@
 % \end{center}
 %
 %
-%
 % The most up-to-date version of this package is available at the
 % \href{https://github.com/OpenLogicProject/bussproofs-extra}{Open Logic
 % Project github site}, where you can file bug reports as well.
-% 
+%
 % \subsection{Example}
 %
 % \begin{verbatim}
@@ -221,13 +223,16 @@
 % \begin{prooftree}
 % \AxiomC{}
 % \Deduce$\Gamma \fCenter \Delta$
+% \LeftLineLabel{$S_1$}
 % \Deduce$\Gamma \fCenter \Delta, A$
 % \LeftSubproofLabel{$\pi$}
 % \AxiomC{}
 % \Deduce$\Gamma' \fCenter \Delta'$
+% \LeftLineLabel{$S_2$}
 % \Deduce$A, \Gamma' \fCenter \Delta'$
 % \RightSubproofLabel{$\pi'$}
 % \RightLabel{cut}
+% \LeftLineLabel{$S_3$}
 % \BinaryInf$\Gamma, \Gamma' \fCenter \Delta, \Delta'$
 % \Deduce$\Pi \fCenter \Lambda$
 % \end{prooftree}
@@ -245,8 +250,61 @@
 % \BinaryInf$\Gamma, \Gamma' \fCenter \Delta, \Delta'$
 % \Deduce$\Pi \fCenter \Lambda$
 % \end{prooftree}
-
-
+%
+% The |\LeftLineLabel| and |\RightLineLabel| commands add labels to
+% the sequent or formula produced by the following |\Axiom|, |\XxxxInf|,
+% and |\Deduce| command. 
+% \begin{prooftree}
+%    \LeftLineLabel{$S_1$}
+%    \RightLineLabel{$S_1$}
+%    \Axiom$\phantom{A, {}}\Gamma \fCenter \Delta$
+%    \LeftLineLabel{$S_2$}
+%    \RightLineLabel{$S_2$}
+%    \UnaryInf$A, \Gamma \fCenter \Delta, B$
+%    \LeftLineLabel{$S_3$}
+%    \Deduce$\Pi \fCenter \Lambda$
+%    \LeftLineLabel{$S_1'$}
+%    \AxiomC{\makebox[\widthof{$A \lor B$}][c]{$A$}}
+%    \LeftLineLabel{$S_2'$}
+%    \UnaryInfC{$A \lor B$}
+%    \LeftLineLabel{$S_3'$}
+%    \DeduceC{$C$}
+%    \LeftLineLabel{$S_4$}
+%    \BinaryInf$\Pi \fCenter \Lambda$
+%    \RightLineLabel{$S_5$}
+%    \UnaryInf$\Pi \fCenter \Lambda$
+% \end{prooftree}
+% If the sequent or formula is itself a premise of an |\XxxInf|
+% command and the conclusion is longer, this may produce a less 
+% than optimal result, as the label is produced before the score 
+% line below (compare the left and right labels of the top left
+% sequent above). In that case you may want to insert extra space 
+% using |\phantom|, or use |\makebox| and the |\widthof| command 
+% of the |calc| package for the |XxxC| variants of the commands 
+% (see the top right formula below) as in the |\Axiom| commands 
+% below.
+% \begin{verbatim}  
+% \begin{prooftree}
+%    \LeftLineLabel{$S_1$}
+%    \RightLineLabel{$S_1$}
+%    \Axiom$\phantom{A, {}}\Gamma \fCenter \Delta$
+%    \LeftLineLabel{$S_2$}
+%    \RightLineLabel{$S_2$}
+%    \UnaryInf$A, \Gamma \fCenter \Delta, B$
+%    \LeftLineLabel{$S_3$}
+%    \Deduce$\Pi \fCenter \Lambda$
+%    \LeftLineLabel{$S_1'$}
+%    \AxiomC{\makebox[\widthof{$A \lor B$}][c]{$A$}}
+%    \LeftLineLabel{$S_2'$}
+%    \UnaryInfC{$A \lor B$}
+%    \LeftLineLabel{$S_3'$}
+%    \DeduceC{$C$}
+%    \LeftLineLabel{$S_4$}
+%    \BinaryInf$\Pi \fCenter \Lambda$
+%    \RightLineLabel{$S_5$}
+%    \UnaryInf$\Pi \fCenter \Lambda$
+% \end{prooftree}    
+% \end{verbatim}    
 %
 % \StopEventually{}
 %
@@ -260,9 +318,8 @@
 %    \begin{macrocode}
 \RequirePackage{bussproofs}
 \RequirePackage{tikz}
-
 %    \end{macrocode}
-% \subsection{Dimensions}
+% \subsection{Dimensions and boxes}
 % 
 % \textsf{bussproofs} aligns sequents at the right end of the sequent
 % arrow, so we need to remember by how much to correct to get
@@ -272,31 +329,45 @@
 %    \begin{macrocode}
 \newdimen\CenterCorrection
 \newdimen\DiagCorrection
-
+%    \end{macrocode}
+% We need two boxes to hold the left and right line labels.
+%    \begin{macrocode}
+\newbox\myBoxLLL
+\newbox\myBoxRLL
 %    \end{macrocode} 
 % \subsection{Deduce Styles} 
 %
 % The following commands set the style for the next |\Deduce|
 % command. |\straightDeduce| produces a simple vertical line of dots,
+% and |\shortDeduce| a line of half that length.
 % |\branchDeduce| produces centered branching (Takeuti/Gentzen-style)
 % dots, |\ddotsDeduce| left-to-right diagonal dots, and |\dotsdDeduce|
 % right-to-left diagonal dots. They do this by redefining the
 % |\fDeduce| command which produces the dots and sets up the
-% dimensions. The |\alwaysDeduce| command is used to (re)set the
-% deduce style to a default and is executed every time a deduction is
-% typeset. It can be redefined to change the default deduce style.
+% dimensions. The TikZ style |deduceLine| is used as argument to the
+% |\draw| command and can be redefined for other line styles as well
+% (e.g., smaller dots or closer spacing).
 %    \begin{macrocode}
+\tikzset{
+    deduceLine/.style = {line width=1.1pt, loosely dotted}}
+
 \def\straightDeduce{%
-  \gdef\fDeduce{\tikz\draw[very thick,loosely dotted] (0,0) -- (0,1);}
+  \gdef\fDeduce{\tikz\draw[deduceLine] (0,0) -- (0,1);}
+  \global\DiagCorrection=0pt
+  \ignorespaces
+}
+
+\def\shortDeduce{%
+  \gdef\fDeduce{\tikz\draw[deduceLine] (0,0) -- (0,.5);}
   \global\DiagCorrection=0pt
   \ignorespaces
 }
 
 \def\branchDeduce{%
   \gdef\fDeduce{\begin{tikzpicture}
-      \draw[very thick,loosely dotted] (0,0) -- (0,1);
-      \draw[very thick,loosely dotted] (-.5,.5) -- (0,0);
-      \draw[very thick,loosely dotted] (.5,.5) -- (0,0);
+      \draw[deduceLine] (0,0) -- (0,1);
+      \draw[deduceLine] (-.5,.5) -- (0,0);
+      \draw[deduceLine] (.5,.5) -- (0,0);
   \end{tikzpicture}}
   \global\DiagCorrection=0pt
   \ignorespaces
@@ -304,7 +375,7 @@
 
 \def\ddotsDeduce{%
   \gdef\fDeduce{\begin{tikzpicture}
-      \draw[very thick,loosely dotted] (0,1) -- (1,0);
+      \draw[deduceLine] (0,1) -- (1,0);
   \end{tikzpicture}}
   \setbox\myBoxA=\hbox{\fDeduce}
   \global\DiagCorrection=-\wd\myBoxA
@@ -313,16 +384,19 @@
 
 \def\dotsdDeduce{%
   \gdef\fDeduce{\begin{tikzpicture}
-      \draw[very thick,loosely dotted] (1,1) -- (0,0);
+      \draw[deduceLine] (1,1) -- (0,0);
   \end{tikzpicture}}
   \setbox\myBoxA=\hbox{\fDeduce}
   \global\DiagCorrection=\wd\myBoxA
   \ignorespaces
 }
-
+%    \end{macrocode}
+% The |\alwaysDeduce| command is used to (re)set the
+% deduce style to a default and is executed every time a deduction is
+% typeset. It can be redefined to change the default deduce style.
+%    \begin{macrocode}
 \def\alwaysDeduce{\straightDeduce}
 \straightDeduce
-
 %    \end{macrocode}
 % \subsection{\texttt{\textbackslash Deduce\$} and
 % \texttt{\textbackslash DeduceC}}
@@ -334,8 +408,7 @@
 \def\Deduce$#1\fCenter#2${%
     \prepUnary%
     \buildConclusion{#1}{#2}%
-    \setbox\myBoxA=\hbox{\fCenter}
-    % if we align at \fCenter, move \fDeduce left by 1/2 width of \fCenter 
+    \setbox\myBoxA=\hbox{\fCenter}%
     \global\CenterCorrection=-.5\wd\myBoxA
     \joinDeduce%
     \resetInferenceDefaults%
@@ -345,14 +418,11 @@
 \def\DeduceC#1{
     \prepUnary%
     \buildConclusionC{#1}%
-    % vdot alignment is off by a bit, correct
-    \global\CenterCorrection=-4pt
-    % Align and join the curBox and the new box into one vbox.
+    \global\CenterCorrection=0pt
     \joinDeduce%
     \resetInferenceDefaults%
     \ignorespaces%
 }
-
 %    \end{macrocode}
 % \section{Typesetting the Deduction}
 % 
@@ -362,6 +432,7 @@
 % |\curScoreCenter| is distance from left edge of score to the 
 % alignment point, and |\curScoreEnd| is width of the score line.
 %    \begin{macrocode}
+
 \def\joinDeduce{%
     \global\advance\curCenter by -\hypKernAmt%
 %    \end{macrocode}
@@ -390,17 +461,6 @@
         \kernUpperBox%
     \fi%
     \advance\curCenter by-.5\DiagCorrection
-    %\ifnum \newScoreStart < \curScoreStart %
-    %    \global \curScoreStart = \newScoreStart \fi%
-    %\ifnum \curScoreEnd < \newScoreEnd %
-    %    \global \curScoreEnd = \newScoreEnd \fi%
-    % Leave room for the left label.
-    %\ifnum \curScoreStart<\wd\myBoxLL%
-    %    \global\displace = \wd\myBoxLL%
-    %    \global\advance\displace by -\curScoreStart%
-    %    \kernUpperBox%
-    %    \kernLowerBox%
-    %\fi%
 %    \end{macrocode}
 % Now we draw the deduction.
 %    \begin{macrocode}
@@ -422,12 +482,12 @@
     \global \curScoreEnd=\newScoreEnd%
     \global \curCenter=\newCenter%
 }
-
 %    \end{macrocode}
 % |\buildDeduce| does for |\DeduceX| what |\buildInf| does for
 % |\XxxInf|: put the deduction bit (dots) into a box and set the
 % dimensions properly.
 %    \begin{macrocode}
+
 \def\buildDeduce{%
     \global\setbox \myBoxD =%
         \hbox{\fDeduce}%
@@ -443,7 +503,6 @@
     \global\advance\curScoreStart by\CenterCorrection
     \global\advance\curScoreEnd by\CenterCorrection
 }
-
 %    \end{macrocode}
 % \subsection{Line Labels}
 % 
@@ -453,19 +512,19 @@
 % produced by |\LeftLabel| and |\RightLabel| (i.e., the distance to
 % the line is $|\ScoreOverhang| + |\labelSpacing|$.
 %    \begin{macrocode}
+
 \def\LeftLineLabel#1{%
   \global\def\displayLeftLineLabel{%
-    \llap{#1\hskip\ScoreOverhangLeft\hskip\labelSpacing}}
+    {#1\hskip\labelSpacing}}
   \ignorespaces}
 
 \def\RightLineLabel#1{%
-  \global\def\displayRightLineLabel{
-    \rlap{\hskip\ScoreOverhangLeft\hskip\labelSpacing #1}}
+  \global\def\displayRightLineLabel{%
+    {\hskip\labelSpacing #1}}
   \ignorespaces}
 
 \global\let\displayLeftLineLabel\relax
 \global\let\displayRightLineLabel\relax
-
 %    \end{macrocode}
 %
 % \subsection{Subproof Labels}
@@ -489,7 +548,6 @@
       \rlap{$\left.\vrule height .5\displace width 0pt\right\}$#1}%
       \vfil}}%
 }
-
 %    \end{macrocode}
 % \subsection{Patched commands from \textsf{bussproofs}}
 %
@@ -516,16 +574,26 @@
     \prepAxiom%
     % Define the boxes
     % bpextra -- add line labels
-    \setbox\myBoxA=\hbox{\displayLeftLineLabel$\mathord{#1}\fCenter\mathord{\relax}$}% %bpextra
-    \setbox\myBoxB=\hbox{$#2$\displayRightLineLabel}% %bpextra
+    \setbox\myBoxA=\hbox{$\mathord{#1}\fCenter\mathord{\relax}$}% 
+    \setbox\myBoxB=\hbox{$#2$}% %bpextra
+    \setbox\myBoxLLL=\hbox{\displayLeftLineLabel}% %bpextra
+    \setbox\myBoxRLL=\hbox{\displayRightLineLabel}% %bpextra
     \global\setbox\curBox=%
-         \hbox{\hskip\ScoreOverhangLeft\relax%
-        \unhcopy\myBoxA\unhcopy\myBoxB\hskip\ScoreOverhangRight\relax}%
+         \hbox{\unhcopy\myBoxLLL%bpextra
+         \hskip\ScoreOverhangLeft\relax
+         \unhcopy\myBoxA
+         \unhcopy\myBoxB
+         \hskip\ScoreOverhangRight
+         \unhcopy\myBoxRLL}%bpextra
     % Set the relevant dimensions for the boxes
     \global\curScoreStart=0pt \relax
     \global\curScoreEnd=\wd\curBox \relax
-    \global\curCenter=\wd\myBoxA \relax
+    \global\curCenter=\wd\myBoxA \relax %bpextra
     \global\advance \curCenter by \ScoreOverhangLeft%
+    % bpextra adjust by dimensions of labels
+    \global\advance \curCenter by \wd\myBoxLLL%bpextra
+    \global\advance\curScoreStart by \wd\myBoxLLL%bpextra
+    \global\advance\curScoreEnd by -\wd\myBoxRLL%bpextra
     % reset line labels to nothing %bpextra
     \global\let\displayLeftLineLabel\relax %bpextra
     \global\let\displayRightLineLabel\relax %bpextra
@@ -536,15 +604,24 @@
     % Get level and correct names set.
     \prepAxiom%
         % Define the box.
-    \setbox\myBoxA=\hbox{\displayLeftLineLabel #1\displayRightLineLabel}% %bpextra
+    \setbox\myBoxA=\hbox{#1}%
+    \setbox\myBoxLLL=\hbox{\displayLeftLineLabel}% %bpextra
+    \setbox\myBoxRLL=\hbox{\displayRightLineLabel}% %bpextra
     \global\setbox\curBox =%
-        \hbox{\hskip\ScoreOverhangLeft\relax%
-                        \unhcopy\myBoxA\hskip\ScoreOverhangRight\relax}%
+        \hbox{\unhcopy\myBoxLLL%bpextra
+            \hskip\ScoreOverhangLeft\relax%
+            \unhcopy\myBoxA
+            \hskip\ScoreOverhangRight\relax
+            \unhcopy\myBoxRLL}% %bpextra
     % Set the relevant dimensions for the boxes
         \global\curScoreStart=0pt \relax
         \global\curScoreEnd=\wd\curBox \relax
-        \global\curCenter=.5\wd\curBox \relax
+        \global\curCenter=.5\wd\myBoxA \relax %bpextra
         \global\advance \curCenter by \ScoreOverhangLeft%
+    % bpextra adjust by dimensions of labels
+    \global\advance \curCenter by \wd\myBoxLLL%bpextra
+    \global\advance\curScoreStart by \wd\myBoxLLL%bpextra
+    \global\advance\curScoreEnd by -\wd\myBoxRLL%bpextra
     % reset line labels to nothing %bpextra
     \global\let\displayLeftLineLabel\relax %bpextra
     \global\let\displayRightLineLabel\relax %bpextra
@@ -553,30 +630,54 @@
 
 \def\buildConclusion#1#2{% Build lower sequent w/ center at \fCenter position.
     % Define the boxes
-        \setbox\myBoxA=\hbox{\displayLeftLineLabel $\mathord{#1}\fCenter\mathord{\relax}$}% %bpextra
-        \setbox\myBoxB=\hbox{$#2$\displayRightLineLabel}% %bpextra
+        \setbox\myBoxA=\hbox{$\mathord{#1}\fCenter\mathord{\relax}$}% 
+        \setbox\myBoxB=\hbox{$#2$}% 
+        \setbox\myBoxLLL=\hbox{\displayLeftLineLabel}% %bpextra
+        \setbox\myBoxRLL=\hbox{\displayRightLineLabel}% %bpextra
     % Put them together in \myBoxC
     \setbox\myBoxC =%
-          \hbox{\hskip\ScoreOverhangLeft\relax%
-        \unhcopy\myBoxA\unhcopy\myBoxB\hskip\ScoreOverhangRight\relax}%
+          \hbox{\unhcopy\myBoxLLL%bpextra
+          \hskip\ScoreOverhangLeft\relax%
+        \unhcopy\myBoxA\unhcopy\myBoxB
+        \hskip\ScoreOverhangRight
+        \unhcopy\myBoxRLL}% %bpextra
     % Calculate the center of the \myBoxC string.
     \newScoreStart=0pt \relax%
     \newCenter=\wd\myBoxA \relax%
     \advance \newCenter by \ScoreOverhangLeft%
     \newScoreEnd=\wd\myBoxC%
+    % bpextra adjust by dimensions of labels
+    \global\advance\newCenter by \wd\myBoxLLL%bpextra
+    \global\advance\newScoreStart by \wd\myBoxLLL%bpextra
+    \global\advance\newScoreEnd by -\wd\myBoxRLL%bpextra
+    % reset line labels to nothing %bpextra
+    \global\let\displayLeftLineLabel\relax %bpextra
+    \global\let\displayRightLineLabel\relax %bpextra
 }
 
 \def\buildConclusionC#1{% Build lower sequent w/o \fCenter present.
         % Define the box.
-    \setbox\myBoxA=\hbox{\displayLeftLineLabel #1\displayRightLineLabel}% %bpextra
-    \setbox\myBoxC =%
-        \hbox{\hbox{\hskip\ScoreOverhangLeft\relax%
-                        \unhcopy\myBoxA\hskip\ScoreOverhangRight\relax}}%
+    \setbox\myBoxA=\hbox{#1}%
+    \setbox\myBoxLLL=\hbox{\displayLeftLineLabel}% %bpextra
+    \setbox\myBoxRLL=\hbox{\displayRightLineLabel}% %bpextra
+\setbox\myBoxC =%
+        \hbox{\unhcopy\myBoxLLL%bpextra
+            \hskip\ScoreOverhangLeft\relax%
+            \unhcopy\myBoxA
+            \hskip\ScoreOverhangRight
+            \unhcopy\myBoxRLL}%bpextra
     % Calculate kerning to line up centers
     \newScoreStart=0pt \relax%
-    \newCenter=.5\wd\myBoxC \relax%
+    \newCenter=.5\wd\myBoxA \relax% bpextra
     \newScoreEnd=\wd\myBoxC%
         \advance \newCenter by \ScoreOverhangLeft%
+    % bpextra adjust by dimensions of labels
+    \global\advance\newCenter by \wd\myBoxLLL%bpextra
+    \global\advance\newScoreStart by \wd\myBoxLLL%bpextra
+    \global\advance\newScoreEnd by -\wd\myBoxRLL%bpextra
+    % reset line labels to nothing %bpextra
+    \global\let\displayLeftLineLabel\relax %bpextra
+    \global\let\displayRightLineLabel\relax %bpextra
 }
 %    \end{macrocode}
 % \Finale

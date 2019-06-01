@@ -22,26 +22,34 @@
 %% 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{bussproofs-extra}
-   [2019/04/04 0.3 Extra commands for bussproofs.sty]
-
+   [2019/05/28 0.4 Extra commands for bussproofs.sty]
 
 \RequirePackage{bussproofs}
 \RequirePackage{tikz}
-
 \newdimen\CenterCorrection
 \newdimen\DiagCorrection
+\newbox\myBoxLLL
+\newbox\myBoxRLL
+\tikzset{
+    deduceLine/.style = {line width=1.1pt, loosely dotted}}
 
 \def\straightDeduce{%
-  \gdef\fDeduce{\tikz\draw[very thick,loosely dotted] (0,0) -- (0,1);}
+  \gdef\fDeduce{\tikz\draw[deduceLine] (0,0) -- (0,1);}
+  \global\DiagCorrection=0pt
+  \ignorespaces
+}
+
+\def\shortDeduce{%
+  \gdef\fDeduce{\tikz\draw[deduceLine] (0,0) -- (0,.5);}
   \global\DiagCorrection=0pt
   \ignorespaces
 }
 
 \def\branchDeduce{%
   \gdef\fDeduce{\begin{tikzpicture}
-      \draw[very thick,loosely dotted] (0,0) -- (0,1);
-      \draw[very thick,loosely dotted] (-.5,.5) -- (0,0);
-      \draw[very thick,loosely dotted] (.5,.5) -- (0,0);
+      \draw[deduceLine] (0,0) -- (0,1);
+      \draw[deduceLine] (-.5,.5) -- (0,0);
+      \draw[deduceLine] (.5,.5) -- (0,0);
   \end{tikzpicture}}
   \global\DiagCorrection=0pt
   \ignorespaces
@@ -49,7 +57,7 @@
 
 \def\ddotsDeduce{%
   \gdef\fDeduce{\begin{tikzpicture}
-      \draw[very thick,loosely dotted] (0,1) -- (1,0);
+      \draw[deduceLine] (0,1) -- (1,0);
   \end{tikzpicture}}
   \setbox\myBoxA=\hbox{\fDeduce}
   \global\DiagCorrection=-\wd\myBoxA
@@ -58,21 +66,18 @@
 
 \def\dotsdDeduce{%
   \gdef\fDeduce{\begin{tikzpicture}
-      \draw[very thick,loosely dotted] (1,1) -- (0,0);
+      \draw[deduceLine] (1,1) -- (0,0);
   \end{tikzpicture}}
   \setbox\myBoxA=\hbox{\fDeduce}
   \global\DiagCorrection=\wd\myBoxA
   \ignorespaces
 }
-
 \def\alwaysDeduce{\straightDeduce}
 \straightDeduce
-
 \def\Deduce$#1\fCenter#2${%
     \prepUnary%
     \buildConclusion{#1}{#2}%
-    \setbox\myBoxA=\hbox{\fCenter}
-    % if we align at \fCenter, move \fDeduce left by 1/2 width of \fCenter
+    \setbox\myBoxA=\hbox{\fCenter}%
     \global\CenterCorrection=-.5\wd\myBoxA
     \joinDeduce%
     \resetInferenceDefaults%
@@ -82,9 +87,7 @@
 \def\DeduceC#1{
     \prepUnary%
     \buildConclusionC{#1}%
-    % vdot alignment is off by a bit, correct
-    \global\CenterCorrection=-4pt
-    % Align and join the curBox and the new box into one vbox.
+    \global\CenterCorrection=0pt
     \joinDeduce%
     \resetInferenceDefaults%
     \ignorespaces%
@@ -109,17 +112,6 @@
         \kernUpperBox%
     \fi%
     \advance\curCenter by-.5\DiagCorrection
-    %\ifnum \newScoreStart < \curScoreStart %
-    %    \global \curScoreStart = \newScoreStart \fi%
-    %\ifnum \curScoreEnd < \newScoreEnd %
-    %    \global \curScoreEnd = \newScoreEnd \fi%
-    % Leave room for the left label.
-    %\ifnum \curScoreStart<\wd\myBoxLL%
-    %    \global\displace = \wd\myBoxLL%
-    %    \global\advance\displace by -\curScoreStart%
-    %    \kernUpperBox%
-    %    \kernLowerBox%
-    %\fi%
     \buildDeduce%
     \buildScoreLabels%
     \ifx\rootAtBottomFlag\myTrue%
@@ -146,17 +138,16 @@
 
 \def\LeftLineLabel#1{%
   \global\def\displayLeftLineLabel{%
-    \llap{#1\hskip\ScoreOverhangLeft\hskip\labelSpacing}}
+    {#1\hskip\labelSpacing}}
   \ignorespaces}
 
 \def\RightLineLabel#1{%
-  \global\def\displayRightLineLabel{
-    \rlap{\hskip\ScoreOverhangLeft\hskip\labelSpacing #1}}
+  \global\def\displayRightLineLabel{%
+    {\hskip\labelSpacing #1}}
   \ignorespaces}
 
 \global\let\displayLeftLineLabel\relax
 \global\let\displayRightLineLabel\relax
-
 
 \def\LeftSubproofLabel#1{%
   \global\setbox\curBox =
@@ -174,7 +165,6 @@
       \rlap{$\left.\vrule height .5\displace width 0pt\right\}$#1}%
       \vfil}}%
 }
-
 \def\resetInferenceDefaults{%
     \global\def\theHypSeparation{\defaultHypSeparation}%
     \global\setbox\myBoxLL=\hbox{\defaultLeftLabel}%
@@ -194,16 +184,26 @@
     \prepAxiom%
     % Define the boxes
     % bpextra -- add line labels
-    \setbox\myBoxA=\hbox{\displayLeftLineLabel$\mathord{#1}\fCenter\mathord{\relax}$}% %bpextra
-    \setbox\myBoxB=\hbox{$#2$\displayRightLineLabel}% %bpextra
+    \setbox\myBoxA=\hbox{$\mathord{#1}\fCenter\mathord{\relax}$}%
+    \setbox\myBoxB=\hbox{$#2$}% %bpextra
+    \setbox\myBoxLLL=\hbox{\displayLeftLineLabel}% %bpextra
+    \setbox\myBoxRLL=\hbox{\displayRightLineLabel}% %bpextra
     \global\setbox\curBox=%
-         \hbox{\hskip\ScoreOverhangLeft\relax%
-        \unhcopy\myBoxA\unhcopy\myBoxB\hskip\ScoreOverhangRight\relax}%
+         \hbox{\unhcopy\myBoxLLL%bpextra
+         \hskip\ScoreOverhangLeft\relax
+         \unhcopy\myBoxA
+         \unhcopy\myBoxB
+         \hskip\ScoreOverhangRight
+         \unhcopy\myBoxRLL}%bpextra
     % Set the relevant dimensions for the boxes
     \global\curScoreStart=0pt \relax
     \global\curScoreEnd=\wd\curBox \relax
-    \global\curCenter=\wd\myBoxA \relax
+    \global\curCenter=\wd\myBoxA \relax %bpextra
     \global\advance \curCenter by \ScoreOverhangLeft%
+    % bpextra adjust by dimensions of labels
+    \global\advance \curCenter by \wd\myBoxLLL%bpextra
+    \global\advance\curScoreStart by \wd\myBoxLLL%bpextra
+    \global\advance\curScoreEnd by -\wd\myBoxRLL%bpextra
     % reset line labels to nothing %bpextra
     \global\let\displayLeftLineLabel\relax %bpextra
     \global\let\displayRightLineLabel\relax %bpextra
@@ -214,15 +214,24 @@
     % Get level and correct names set.
     \prepAxiom%
         % Define the box.
-    \setbox\myBoxA=\hbox{\displayLeftLineLabel #1\displayRightLineLabel}% %bpextra
+    \setbox\myBoxA=\hbox{#1}%
+    \setbox\myBoxLLL=\hbox{\displayLeftLineLabel}% %bpextra
+    \setbox\myBoxRLL=\hbox{\displayRightLineLabel}% %bpextra
     \global\setbox\curBox =%
-        \hbox{\hskip\ScoreOverhangLeft\relax%
-                        \unhcopy\myBoxA\hskip\ScoreOverhangRight\relax}%
+        \hbox{\unhcopy\myBoxLLL%bpextra
+            \hskip\ScoreOverhangLeft\relax%
+            \unhcopy\myBoxA
+            \hskip\ScoreOverhangRight\relax
+            \unhcopy\myBoxRLL}% %bpextra
     % Set the relevant dimensions for the boxes
         \global\curScoreStart=0pt \relax
         \global\curScoreEnd=\wd\curBox \relax
-        \global\curCenter=.5\wd\curBox \relax
+        \global\curCenter=.5\wd\myBoxA \relax %bpextra
         \global\advance \curCenter by \ScoreOverhangLeft%
+    % bpextra adjust by dimensions of labels
+    \global\advance \curCenter by \wd\myBoxLLL%bpextra
+    \global\advance\curScoreStart by \wd\myBoxLLL%bpextra
+    \global\advance\curScoreEnd by -\wd\myBoxRLL%bpextra
     % reset line labels to nothing %bpextra
     \global\let\displayLeftLineLabel\relax %bpextra
     \global\let\displayRightLineLabel\relax %bpextra
@@ -231,30 +240,54 @@
 
 \def\buildConclusion#1#2{% Build lower sequent w/ center at \fCenter position.
     % Define the boxes
-        \setbox\myBoxA=\hbox{\displayLeftLineLabel $\mathord{#1}\fCenter\mathord{\relax}$}% %bpextra
-        \setbox\myBoxB=\hbox{$#2$\displayRightLineLabel}% %bpextra
+        \setbox\myBoxA=\hbox{$\mathord{#1}\fCenter\mathord{\relax}$}%
+        \setbox\myBoxB=\hbox{$#2$}%
+        \setbox\myBoxLLL=\hbox{\displayLeftLineLabel}% %bpextra
+        \setbox\myBoxRLL=\hbox{\displayRightLineLabel}% %bpextra
     % Put them together in \myBoxC
     \setbox\myBoxC =%
-          \hbox{\hskip\ScoreOverhangLeft\relax%
-        \unhcopy\myBoxA\unhcopy\myBoxB\hskip\ScoreOverhangRight\relax}%
+          \hbox{\unhcopy\myBoxLLL%bpextra
+          \hskip\ScoreOverhangLeft\relax%
+        \unhcopy\myBoxA\unhcopy\myBoxB
+        \hskip\ScoreOverhangRight
+        \unhcopy\myBoxRLL}% %bpextra
     % Calculate the center of the \myBoxC string.
     \newScoreStart=0pt \relax%
     \newCenter=\wd\myBoxA \relax%
     \advance \newCenter by \ScoreOverhangLeft%
     \newScoreEnd=\wd\myBoxC%
+    % bpextra adjust by dimensions of labels
+    \global\advance\newCenter by \wd\myBoxLLL%bpextra
+    \global\advance\newScoreStart by \wd\myBoxLLL%bpextra
+    \global\advance\newScoreEnd by -\wd\myBoxRLL%bpextra
+    % reset line labels to nothing %bpextra
+    \global\let\displayLeftLineLabel\relax %bpextra
+    \global\let\displayRightLineLabel\relax %bpextra
 }
 
 \def\buildConclusionC#1{% Build lower sequent w/o \fCenter present.
         % Define the box.
-    \setbox\myBoxA=\hbox{\displayLeftLineLabel #1\displayRightLineLabel}% %bpextra
-    \setbox\myBoxC =%
-        \hbox{\hbox{\hskip\ScoreOverhangLeft\relax%
-                        \unhcopy\myBoxA\hskip\ScoreOverhangRight\relax}}%
+    \setbox\myBoxA=\hbox{#1}%
+    \setbox\myBoxLLL=\hbox{\displayLeftLineLabel}% %bpextra
+    \setbox\myBoxRLL=\hbox{\displayRightLineLabel}% %bpextra
+\setbox\myBoxC =%
+        \hbox{\unhcopy\myBoxLLL%bpextra
+            \hskip\ScoreOverhangLeft\relax%
+            \unhcopy\myBoxA
+            \hskip\ScoreOverhangRight
+            \unhcopy\myBoxRLL}%bpextra
     % Calculate kerning to line up centers
     \newScoreStart=0pt \relax%
-    \newCenter=.5\wd\myBoxC \relax%
+    \newCenter=.5\wd\myBoxA \relax% bpextra
     \newScoreEnd=\wd\myBoxC%
         \advance \newCenter by \ScoreOverhangLeft%
+    % bpextra adjust by dimensions of labels
+    \global\advance\newCenter by \wd\myBoxLLL%bpextra
+    \global\advance\newScoreStart by \wd\myBoxLLL%bpextra
+    \global\advance\newScoreEnd by -\wd\myBoxRLL%bpextra
+    % reset line labels to nothing %bpextra
+    \global\let\displayLeftLineLabel\relax %bpextra
+    \global\let\displayRightLineLabel\relax %bpextra
 }
 \endinput
 %%

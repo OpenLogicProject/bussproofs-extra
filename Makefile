@@ -1,6 +1,7 @@
-ALL: bussproofs-extra.sty bussproofs-extra.pdf
+all: bussproofs-extra.sty bussproofs-extra.pdf
 
 bussproofs-extra.sty: bussproofs-extra.dtx bussproofs-extra.ins
+	rm bussproofs-extra.sty
 	latex bussproofs-extra.ins
 
 bussproofs-extra.pdf: bussproofs-extra.sty
